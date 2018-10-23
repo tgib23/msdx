@@ -1,0 +1,89 @@
+#!/usr/local/bin/python3
+
+import sys
+import os
+import shutil
+import tarfile
+import subprocess
+import glob
+import datetime
+
+TMP_DIR = "./msdx_tmp"
+
+args = sys.argv
+
+def extract_sd(sd_file):
+    if not [ os.path.exists(sd_file) ]:
+        sys.exit("support dump file " + sd_file + "does not exists")
+    
+    if os.path.exists(TMP_DIR):
+        shutil.rmtree(TMP_DIR)
+    
+    tar = tarfile.open(sd_file)
+    tar.extractall(path=TMP_DIR)
+    tar.close()
+    
+    dir_name = os.listdir(TMP_DIR)[0]
+    print(dir_name)
+    
+    file_name = ""
+    
+    sd_meta = ['ls', '-l', TMP_DIR]
+    res = subprocess.check_output(sd_meta).split()
+    sd_time = res[7].decode('utf-8') + "-" + res[8].decode('utf-8') + "-" + res[9].decode('utf-8')
+    
+    with open(TMP_DIR + "/" + dir_name + "/hostname") as f:
+        s = f.read().rstrip()
+        hostname = s
+        print(hostname)
+ 
+    working_dir = hostname + "-" + sd_time
+    os.rename(TMP_DIR + "/" + dir_name, working_dir)
+    shutil.rmtree(TMP_DIR)
+
+    return working_dir
+
+
+def check_logs(working_dir):
+    format_A = '%Y-%m-%d %H:%M:%S,%f'
+    format_B = '%Y-%m-%dT%H:%M:%S,%f'
+    logs =       {"mfs":"mapr-logs/mfs.log-3*", "warden":"mapr-logs/warden.log*",
+                  "nfs":"mapr-logs/nfsserver.log*",
+                  "nodemanager":"hadoop-2.7.0-logs/yarn-mapr-nodemanager*.log*","resourcemanager":"hadoop-2.7.0-logs/yarn-mapr-resourcemanager*.log*",
+                  "hivemeta":"hive-2.1/mapr/mapr-metastore-*", "hs2":"hive-2.1/mapr/mapr-hiveserver2-*"}
+    start_logs = {"mfs":"Starting fileserver", "warden":"My pid",
+                  "nfs":"NFS server starting",
+                  "nodemanager":"NodeManager: STARTUP_MSG:", "resourcemanager":"ResourceManager: STARTUP_MSG:",
+                  "hivemeta":"Starting hive metastore on port", "hs2":"HiveServer2: Starting HiveServer2"}
+    end_logs =   {"warden":"ShutdownHook completed",
+                  "nodemanager":"NodeManager: SHUTDOWN_MSG:",
+                  "hivemeta":"HiveMetaStore: SHUTDOWN_MSG:", "hs2":"HiveServer2: SHUTDOWN_MSG"}
+    time_format = {"mfs" : format_A, "warden":format_A, "nfs":format_A, "nodemanager":format_A,"resourcemanager":format_A,
+                   "hivemeta":format_B, "hs2":format_B}
+    errors = {}
+    event_record = {}
+
+    for k,v in logs.items():
+        err_counter = 0
+        for filename in glob.glob(working_dir + "/logs/" + v):
+            print(filename)
+            f = open(filename, "r")
+            lines = f.readlines()
+            for line in lines:
+                if line.find('ERROR') != -1:
+                    err_counter += 1
+                if line.find(start_logs[k]) != -1:
+                    event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "start " + k
+                if k in end_logs and line.find(end_logs[k]) != -1:
+                    event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "end   " + k
+                    
+            f.close()
+            errors[k] = err_counter
+    
+    for k,v in errors.items():
+        print(k, v)
+    for k,v in sorted(event_record.items()):
+        print(k, v)
+
+working_dir = extract_sd(args[1])
+check_logs(working_dir)
