@@ -51,15 +51,19 @@ def check_logs(working_dir):
                   "nfs":"mapr-logs/nfsserver.log*",
                   "nodemanager":"hadoop-2.7.0-logs/yarn-mapr-nodemanager*.log*","resourcemanager":"hadoop-2.7.0-logs/yarn-mapr-resourcemanager*.log*",
                   "hivemeta":"hive-2.1/mapr/mapr-metastore-*", "hs2":"hive-2.1/mapr/mapr-hiveserver2-*"}
-    start_logs = {"mfs":"Starting fileserver", "warden":"My pid",
+    start_logs = {"os":"Initializing cgroup subsys cpuset", "mfs":"Starting fileserver", "warden":"My pid",
                   "nfs":"NFS server starting",
                   "nodemanager":"NodeManager: STARTUP_MSG:", "resourcemanager":"ResourceManager: STARTUP_MSG:",
                   "hivemeta":"Starting hive metastore on port", "hs2":"HiveServer2: Starting HiveServer2"}
-    end_logs =   {"warden":"ShutdownHook completed",
+    end_logs =   {"os":"Stopping Timers", "warden":"ShutdownHook completed", "mfs":"Shutdown ctx",
                   "nodemanager":"NodeManager: SHUTDOWN_MSG:",
                   "hivemeta":"HiveMetaStore: SHUTDOWN_MSG:", "hs2":"HiveServer2: SHUTDOWN_MSG"}
     time_format = {"mfs" : format_A, "warden":format_A, "nfs":format_A, "nodemanager":format_A,"resourcemanager":format_A,
                    "hivemeta":format_B, "hs2":format_B}
+    cosmetics   = {"warden":"warden",
+                   "cldb":"    cldb", "mfs":"    mfs",
+                   "nodemanager":"        nodemanager", "resourcemanager":"        resourcemanager", "nfs":"        nfs",
+                   "hivemeta":"            hivemeta", "hs2":"            hs2"}
     errors = {}
     event_record = {}
 
@@ -73,9 +77,9 @@ def check_logs(working_dir):
                 if line.find('ERROR') != -1:
                     err_counter += 1
                 if line.find(start_logs[k]) != -1:
-                    event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "start " + k
+                    event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "start " + cosmetics[k]
                 if k in end_logs and line.find(end_logs[k]) != -1:
-                    event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "end   " + k
+                    event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "end   " + cosmetics[k]
                     
             f.close()
             errors[k] = err_counter
