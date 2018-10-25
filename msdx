@@ -48,27 +48,30 @@ def check_logs(working_dir):
     format_A = '%Y-%m-%d %H:%M:%S,%f'
     format_B = '%Y-%m-%dT%H:%M:%S,%f'
     logs =       {"mfs":"mapr-logs/mfs.log-3*", "warden":"mapr-logs/warden.log*",
-                  "nfs":"mapr-logs/nfsserver.log*",
+                  "cldb":"mapr-logs/cldb.log*", "nfs":"mapr-logs/nfsserver.log*",
                   "nodemanager":"hadoop-2.7.0-logs/yarn-mapr-nodemanager*.log*","resourcemanager":"hadoop-2.7.0-logs/yarn-mapr-resourcemanager*.log*",
                   "hivemeta":"hive-2.1/mapr/mapr-metastore-*", "hs2":"hive-2.1/mapr/mapr-hiveserver2-*"}
     start_logs = {"os":"Initializing cgroup subsys cpuset", "mfs":"Starting fileserver", "warden":"My pid",
-                  "nfs":"NFS server starting",
+                  "cldb":"CLDBInit: Start CLDBServer", "nfs":"NFS server starting",
                   "nodemanager":"NodeManager: STARTUP_MSG:", "resourcemanager":"ResourceManager: STARTUP_MSG:",
                   "hivemeta":"Starting hive metastore on port", "hs2":"HiveServer2: Starting HiveServer2"}
     end_logs =   {"os":"Stopping Timers", "warden":"ShutdownHook completed", "mfs":"Shutdown ctx",
-                  "nodemanager":"NodeManager: SHUTDOWN_MSG:",
+                  "cldb":"CLDB ShutDown Hook called", "nodemanager":"NodeManager: SHUTDOWN_MSG:",
                   "hivemeta":"HiveMetaStore: SHUTDOWN_MSG:", "hs2":"HiveServer2: SHUTDOWN_MSG"}
-    time_format = {"mfs" : format_A, "warden":format_A, "nfs":format_A, "nodemanager":format_A,"resourcemanager":format_A,
+    time_format = {"mfs" : format_A, "warden":format_A, "cldb":format_A,
+                   "nfs":format_A, "nodemanager":format_A,"resourcemanager":format_A,
                    "hivemeta":format_B, "hs2":format_B}
     cosmetics   = {"warden":"warden",
                    "cldb":"    cldb", "mfs":"    mfs",
                    "nodemanager":"        nodemanager", "resourcemanager":"        resourcemanager", "nfs":"        nfs",
                    "hivemeta":"            hivemeta", "hs2":"            hs2"}
     errors = {}
+    fatal  = {}
     event_record = {}
 
     for k,v in logs.items():
         err_counter = 0
+        fatal_counter = 0
         for filename in glob.glob(working_dir + "/logs/" + v):
             print(filename)
             f = open(filename, "r")
@@ -76,6 +79,8 @@ def check_logs(working_dir):
             for line in lines:
                 if line.find('ERROR') != -1:
                     err_counter += 1
+                if line.find('FATAL') != -1:
+                    fatal_counter += 1
                 if line.find(start_logs[k]) != -1:
                     event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "start " + cosmetics[k]
                 if k in end_logs and line.find(end_logs[k]) != -1:
@@ -83,9 +88,10 @@ def check_logs(working_dir):
                     
             f.close()
             errors[k] = err_counter
+            fatal[k]  = fatal_counter
     
     for k,v in errors.items():
-        print(k, v)
+        print(k, " ERROR:", v, ", FATAL:", fatal[k])
     for k,v in sorted(event_record.items()):
         print(k, v)
 
