@@ -74,7 +74,7 @@ def check_logs(working_dir):
         err_counter = 0
         fatal_counter = 0
         for filename in glob.glob(working_dir + "/logs/" + v):
-            print(filename)
+            msdx_print(filename)
             f = open(filename, "r")
             lines = f.readlines()
             for line in lines:
@@ -92,9 +92,9 @@ def check_logs(working_dir):
             fatal[k]  = fatal_counter
     
     for k,v in errors.items():
-        print(k, "\t\t\t ERROR:", v, ", FATAL:", fatal[k])
+        msdx_print(k + "\t\t\t ERROR:" + str(v) + ", FATAL:" + str(fatal[k]))
     for k,v in sorted(event_record.items()):
-        print(k, v)
+        msdx_print(str(k) + " " + v)
 
 
 def check_ifconfig(working_dir):
@@ -105,13 +105,19 @@ def check_ifconfig(working_dir):
             items = re.split(" +", line.rstrip())
             if items[1] == 'TX':
                 if items[3] != '0' or items[5] != '0' or items[7] != '0' or items[9] != '0' or items[11] != '0':
-                    print ("Some errors detected : " + line.rstrip())
+                    msdx_print ("Some errors detected : " + line.rstrip())
             else:
                 if items[3] != '0' or items[5] != '0' or items[7] != '0' or items[9] != '0':
-                    print ("Some errors detected : " + line.rstrip())
+                    msdx_print ("Some errors detected : " + line.rstrip())
 
 
+def msdx_print(s):
+    msdx_f.write(s + "\n")
+    print(s)
 
 working_dir = extract_sd(args[1])
+msdx_f = open(working_dir + "/msdx.txt", mode="w")
 check_logs(working_dir)
 check_ifconfig(working_dir)
+msdx_f.close()
+print("Check output in " + working_dir + "/msdx.txt")
