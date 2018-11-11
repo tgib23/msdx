@@ -31,7 +31,7 @@ def extract_sd(sd_file):
     
     sd_meta = ['ls', '-l', TMP_DIR]
     res = subprocess.check_output(sd_meta).split()
-    sd_time = res[7].decode('utf-8') + "-" + res[8].decode('utf-8') + "-" + res[9].decode('utf-8')
+    sd_time = res[7].decode('utf-8') + "-" + res[8].decode('utf-8') + "-" + res[9].decode('utf-8').replace(":", "")
     
     with open(TMP_DIR + "/" + dir_name + "/hostname") as f:
         s = f.read().rstrip()
