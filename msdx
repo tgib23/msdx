@@ -45,6 +45,15 @@ def extract_sd(sd_file):
     return working_dir
 
 
+def check_os(working_dir):
+    f = open(working_dir + "/system_info/lsb_release_a", "r")
+    lines = f.readlines()
+    for line in lines:
+        if line.find('Description:') != -1:
+            items = re.split("\t", line.rstrip())
+            msdx_print("OS : " + items[1])
+            return items[1]
+
 def check_logs(working_dir):
     format_A = '%Y-%m-%d %H:%M:%S,%f'
     format_B = '%Y-%m-%dT%H:%M:%S,%f'
@@ -123,6 +132,7 @@ def msdx_print(s):
 
 working_dir = extract_sd(args[1])
 msdx_f = open(working_dir + "/msdx.txt", mode="w")
+check_os(working_dir)
 check_logs(working_dir)
 check_ifconfig(working_dir)
 msdx_f.close()
