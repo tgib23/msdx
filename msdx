@@ -59,24 +59,24 @@ def check_logs(working_dir):
     format_B = '%Y-%m-%dT%H:%M:%S,%f'
     logs =       {"mfs":"mapr-logs/mfs.log-3*", "warden":"mapr-logs/warden.log*",
                   "cldb":"mapr-logs/cldb.log*", "nfs":"mapr-logs/nfsserver.log*",
-                  "apiserver":"mapr-logs/apiserver/apiserver*",
+                  "apiserver":"mapr-logs/apiserver/apiserver*", "adminui":"mapr-logs/adminuiapp*",
                   "nodemanager":"hadoop-2.7.0-logs/yarn-mapr-nodemanager*.log*","resourcemanager":"hadoop-2.7.0-logs/yarn-mapr-resourcemanager*.log*",
                   "hivemeta":"hive-2.1/mapr/mapr-metastore-*", "hs2":"hive-2.1/mapr/mapr-hiveserver2-*"}
     start_logs = {"os":"Initializing cgroup subsys cpuset", "mfs":"Starting fileserver", "warden":"My pid",
                   "cldb":"CLDBInit: Start CLDBServer", "nfs":"NFS server starting",
-                  "apiserver":"Server Started",
+                  "apiserver":"Server Started", "adminui":"Initializing Web Server",
                   "nodemanager":"NodeManager: STARTUP_MSG:", "resourcemanager":"ResourceManager: STARTUP_MSG:",
                   "hivemeta":"Starting hive metastore on port", "hs2":"HiveServer2: Starting HiveServer2"}
     end_logs =   {"os":"Stopping Timers", "warden":"ShutdownHook completed", "mfs":"Shutdown ctx",
                   "cldb":"CLDB ShutDown Hook called", "apiserver":"Running shutdown hook",
                   "nodemanager":"NodeManager: SHUTDOWN_MSG:",
                   "hivemeta":"HiveMetaStore: SHUTDOWN_MSG:", "hs2":"HiveServer2: SHUTDOWN_MSG"}
-    time_format = {"mfs" : format_A, "warden":format_A, "cldb":format_A, "apiserver":format_A,
+    time_format = {"mfs" : format_A, "warden":format_A, "cldb":format_A, "apiserver":format_A, "adminui":format_A,
                    "nfs":format_A, "nodemanager":format_A,"resourcemanager":format_A,
                    "hivemeta":format_B, "hs2":format_B}
     cosmetics   = {"warden":"warden",
                    "cldb":"\tcldb", "mfs":"\tmfs",
-                   "nodemanager":"\t\tnodemanager", "resourcemanager":"\t\tresourcemanager", "nfs":"\t\tnfs", "apiserver":"\t\tapiserver",
+                   "nodemanager":"\t\tnodemanager", "resourcemanager":"\t\tresourcemanager", "nfs":"\t\tnfs", "apiserver":"\t\tapiserver", "adminui":"\t\twebserver",
                    "hivemeta":"\t\t\thivemeta", "hs2":"\t\t\ths2"}
     errors = {}
     fatal  = {}
