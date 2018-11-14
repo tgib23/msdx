@@ -82,6 +82,7 @@ def check_logs(working_dir):
     fatal  = {}
     event_record = {}
 
+    msdx_print("\n\nLogs found")
     for k,v in logs.items():
         err_counter = 0
         fatal_counter = 0
@@ -109,13 +110,17 @@ def check_logs(working_dir):
             errors[k] = err_counter
             fatal[k]  = fatal_counter
     
+    msdx_print("\n\nERROR and FATAL counts")
     for k,v in errors.items():
         msdx_print(k + "\t\t\t ERROR:" + str(v) + ", FATAL:" + str(fatal[k]))
+
+    msdx_print("\n\nSTART/END records")
     for k,v in sorted(event_record.items()):
         msdx_print(str(k) + " " + v)
 
 
 def check_ifconfig(working_dir):
+    msdx_print("\n\nNetwork error counts")
     f = open(working_dir + "/system_info/ifconfig_a", "r")
     lines = f.readlines()
     for line in lines:
@@ -139,4 +144,4 @@ check_os(working_dir)
 check_logs(working_dir)
 check_ifconfig(working_dir)
 msdx_f.close()
-print("Check output in " + working_dir + "/msdx.txt")
+print("\n\nCheck output in " + working_dir + "/msdx.txt")
