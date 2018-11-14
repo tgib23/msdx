@@ -100,12 +100,12 @@ def check_logs(working_dir):
                     fatal_counter += 1
                 if line.find(start_logs[k]) != -1:
                     try:
-                        event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "start " + cosmetics[k]
+                        event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = cosmetics[k] + " start"
                     except:
                         print("datetime error:", line)
                 if k in end_logs and line.find(end_logs[k]) != -1:
                     try:
-                        event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = "end   " + cosmetics[k]
+                        event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = cosmetics[k] + " end"
                     except:
                         print("datetime error:", line)
                     
