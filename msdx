@@ -12,9 +12,11 @@ import re
 TMP_DIR = "./msdx_tmp"
 
 args = sys.argv
+working_dir = ""
 rhel_ver = ""
 
 def extract_sd(sd_file):
+    global working_dir
     if not [ os.path.exists(sd_file) ]:
         sys.exit("support dump file " + sd_file + "does not exists")
     
@@ -43,11 +45,9 @@ def extract_sd(sd_file):
     os.rename(TMP_DIR + "/" + dir_name, working_dir)
     shutil.rmtree(TMP_DIR)
 
-    return working_dir
 
-
-def check_os(working_dir):
-    global rhel_ver
+def check_os():
+    global rhel_ver, working_dir
     f = open(working_dir + "/system_info/lsb_release_a", "r")
     lines = f.readlines()
     for line in lines:
@@ -58,7 +58,8 @@ def check_os(working_dir):
             items = re.split("\t", line.rstrip())
             rhel_ver = items[1]
 
-def check_logs(working_dir):
+def check_logs():
+    global working_dir
     format_A = '%Y-%m-%d %H:%M:%S,%f'
     format_B = '%Y-%m-%dT%H:%M:%S,%f'
     logs =       {"mfs":"mapr-logs/mfs.log-3*", "warden":"mapr-logs/warden.log*",
@@ -126,13 +127,14 @@ def check_logs(working_dir):
         msdx_print(str(k) + " " + v)
 
 
-def check_network(working_dir):
-    check_ifconfig(working_dir)
-    check_netstat(working_dir)
-    check_firewall(working_dir)
+def check_network():
+    global working_dir
+    check_ifconfig()
+    check_netstat()
+    check_firewall()
 
-def check_ifconfig(working_dir):
-    global rhel_ver
+def check_ifconfig():
+    global rhel_ver, working_dir
     msdx_print("\n\nifconfig network failure detection")
     f = open(working_dir + "/system_info/ifconfig_a", "r")
     drop_flg = False
@@ -154,7 +156,8 @@ def check_ifconfig(working_dir):
     if drop_flg == False:
         msdx_print("drop is not detected in ifconfig")
 
-def check_netstat(working_dir):
+def check_netstat():
+    global working_dir
     msdx_print("\n\nNetstat check")
     f = open(working_dir + "/system_info/netstat_s", "r")
     lines = f.readlines()
@@ -171,7 +174,8 @@ def check_netstat(working_dir):
 
 
 
-def check_firewall(working_dir):
+def check_firewall():
+    global working_dir
     msdx_print("\n\nFirewall check")
     f = open(working_dir + "/system_info/ps_efly", "r")
     lines = f.readlines()
@@ -186,11 +190,11 @@ def msdx_print(s):
     msdx_f.write(s + "\n")
     print(s)
 
-working_dir = extract_sd(args[1])
+extract_sd(args[1])
 msdx_f = open(working_dir + "/msdx.txt", mode="w")
-check_os(working_dir)
-check_logs(working_dir)
-check_network(working_dir)
+check_os()
+check_logs()
+check_network()
 msdx_f.close()
 print("\n\nCheck output in " + working_dir + "/msdx.txt")
 
