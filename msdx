@@ -105,12 +105,12 @@ def check_logs():
                     fatal_counter += 1
                 if line.find(start_logs[k]) != -1:
                     try:
-                        event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = cosmetics[k] + " start"
+                        event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = cosmetics[k] + " on"
                     except:
                         print("datetime error:", line)
                 if k in end_logs and line.find(end_logs[k]) != -1:
                     try:
-                        event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = cosmetics[k] + " end"
+                        event_record[datetime.datetime.strptime(line[0:23], time_format[k])] = cosmetics[k] + " off"
                     except:
                         print("datetime error:", line)
                     
